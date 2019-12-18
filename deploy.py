@@ -8,11 +8,22 @@ import time
 import subprocess
 
 
+def check(stack):
+    with open(stack['template_file'], "r") as f:
+        if "aws:SourceIp" in f.read():
+            return True
+    return False
+
+
 def create_stack_sets(stacks, stackset_region):
     CF = boto3.client("cloudformation", region_name=stackset_region)
     for stack in stacks:
         stack_name = stack['name']
         stack_description = stack['description']
+        if check(stack):
+            print ("The template has source ip in it")
+        else:
+            print ("The template has no source ip in it")
         with open(stack['template_file'], "r") as file_template:
             with open(stack['parameter_file'], "r") as file_param:
                 json_param_file = json.load(file_param)

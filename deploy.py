@@ -8,6 +8,9 @@ import time
 import subprocess
 
 
+
+#Adding the check to make sure source ip is listed in the stack template for the role. 
+#This is not the most ideal solution
 def check(stack):
     with open(stack['template_file'], "r") as f:
         if "aws:SourceIp" in f.read():
@@ -20,6 +23,7 @@ def create_stack_sets(stacks, stackset_region):
     for stack in stacks:
         stack_name = stack['name']
         stack_description = stack['description']
+        #if the stack template passes the sourceip check continue otherwise return error
         if check(stack):
             print ("The template has source ip in it")
             with open(stack['template_file'], "r") as file_template:

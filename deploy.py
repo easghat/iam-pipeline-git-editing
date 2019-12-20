@@ -22,39 +22,41 @@ def create_stack_sets(stacks, stackset_region):
         stack_description = stack['description']
         if check(stack):
             print ("The template has source ip in it")
-        else:
-            print ("The template has no source ip in it")
-        with open(stack['template_file'], "r") as file_template:
-            with open(stack['parameter_file'], "r") as file_param:
-                json_param_file = json.load(file_param)
-                try:
-                    response = CF.describe_stack_set(
-                        StackSetName=stack_name
-                    )
-                    print("Stack found: {}".format(stack_name))
-                    print("Updating...")
-                    update_stack = CF.update_stack_set(
-                        StackSetName=stack_name,
-                        Description=stack_description,
-                        TemplateBody=file_template.read(),
-                        Parameters=json_param_file,
-                        Capabilities=['CAPABILITY_NAMED_IAM']
+            with open(stack['template_file'], "r") as file_template:
+                with open(stack['parameter_file'], "r") as file_param:
+                    json_param_file = json.load(file_param)
+                    try:
+                        response = CF.describe_stack_set(
+                            StackSetName=stack_name
                         )
-                    print("Response: {}".format(update_stack))
-                except Exception as e:
-                    if e.response['Error']['Code'] == "StackSetNotFoundException":
-                        print("Stack NOT found: {}".format(stack_name))
-                        print("Creating...")
-                        create_stack = CF.create_stack_set(
+                        print("Stack found: {}".format(stack_name))
+                        print("Updating...")
+                        update_stack = CF.update_stack_set(
                             StackSetName=stack_name,
                             Description=stack_description,
                             TemplateBody=file_template.read(),
                             Parameters=json_param_file,
                             Capabilities=['CAPABILITY_NAMED_IAM']
                             )
-                        print("Response: {}".format(create_stack))
-                    else:
-                        print("ERROR: {}".format(e.response['Error']['Code']))
+                        print("Response: {}".format(update_stack))
+                    except Exception as e:
+                        if e.response['Error']['Code'] == "StackSetNotFoundException":
+                            print("Stack NOT found: {}".format(stack_name))
+                            print("Creating...")
+                            create_stack = CF.create_stack_set(
+                                StackSetName=stack_name,
+                                Description=stack_description,
+                                TemplateBody=file_template.read(),
+                                Parameters=json_param_file,
+                                Capabilities=['CAPABILITY_NAMED_IAM']
+                                )
+                            print("Response: {}".format(create_stack))
+                        else:
+                            print("ERROR: {}".format(e.response['Error']['Code']))
+        else:
+            print ("The template has no source ip in it")
+            sys.exit(1)
+        
     return "success"
 
 
